@@ -1,52 +1,6 @@
 import type { User, Pin, Avatar } from '@/types';
 
-export const users: User[] = [
-  { id: 'user-1', name: 'Alex', email: 'alex@example.com', avatar: 'https://placehold.co/100x100.png', points: 150 },
-  { id: 'user-2', name: 'Maria', email: 'maria@example.com', avatar: 'https://placehold.co/100x100.png', points: 25 },
-  { id: 'user-3', name: 'David', email: 'david@example.com', avatar: 'https://placehold.co/100x100.png', points: 88 },
-  { id: 'user-4', name: 'Sophia', email: 'sophia@example.com', avatar: 'https://placehold.co/100x100.png', points: 12 },
-  { id: 'user-5', name: 'Chen', email: 'chen@example.com', avatar: 'https://placehold.co/100x100.png', points: 42 },
-];
-
-export const pins: Pin[] = [
-  {
-    id: 'pin-1',
-    giver: users[1],
-    receiver: users[0],
-    reason: 'A build quebrou de novo!',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-  },
-  {
-    id: 'pin-2',
-    giver: users[2],
-    receiver: users[1],
-    reason: 'Esqueceu de mutar na reunião geral.',
-    timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000), // 23 hours ago
-  },
-  {
-    id: 'pin-3',
-    giver: users[0],
-    receiver: users[2],
-    reason: 'Usou "Responder a Todos" em um e-mail para toda a empresa.',
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-  },
-  {
-    id: 'pin-4',
-    giver: users[3],
-    receiver: users[0],
-    reason: 'A máquina de café está vazia.',
-    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-  },
-  {
-    id: 'pin-5',
-    giver: users[4],
-    receiver: users[3],
-    reason: 'Meu PR está aguardando revisão há 3 dias.',
-    timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
-  },
-];
-
-export const avatars: Avatar[] = [
+export const initialAvatars: Avatar[] = [
   { id: 'avatar-1', name: 'Ember', image: 'https://placehold.co/200x200.png', price: 0, hint: 'fire character' },
   { id: 'avatar-2', name: 'Anger', image: 'https://placehold.co/200x200.png', price: 50, hint: 'red angry' },
   { id: 'avatar-3', name: 'Hades', image: 'https://placehold.co/200x200.png', price: 75, hint: 'blue flame' },
@@ -55,8 +9,49 @@ export const avatars: Avatar[] = [
   { id: 'avatar-6', name: 'Maleficent', image: 'https://placehold.co/200x200.png', price: 150, hint: 'evil fairy' },
 ];
 
-// Set initial avatar for all users
-users.forEach(user => {
-  user.avatar = avatars[0].image;
-  user.hint = avatars[0].hint;
-});
+export const initialUsers: User[] = [
+  { id: 'user-1', uid: 'uid-1', name: 'Alex', email: 'alex@example.com', avatar: initialAvatars[0].image, points: 150, role: 'user', hint: initialAvatars[0].hint },
+  { id: 'user-2', uid: 'uid-2', name: 'Maria', email: 'maria@example.com', avatar: initialAvatars[0].image, points: 25, role: 'user', hint: initialAvatars[0].hint },
+  { id: 'user-3', uid: 'uid-3', name: 'David', email: 'david@example.com', avatar: initialAvatars[0].image, points: 88, role: 'user', hint: initialAvatars[0].hint },
+  { id: 'user-4', uid: 'uid-4', name: 'Sophia', email: 'sophia@example.com', avatar: initialAvatars[0].image, points: 12, role: 'user', hint: initialAvatars[0].hint },
+  { id: 'user-5', uid: 'uid-5', name: 'Chen', email: 'chen@example.com', avatar: initialAvatars[0].image, points: 42, role: 'user', hint: initialAvatars[0].hint },
+  { id: 'user-admin', uid: 'uid-admin', name: 'Raul Ferreira', email: 'raulferreiradesouza@gmail.com', avatar: initialAvatars[0].image, points: 999, role: 'admin', hint: initialAvatars[0].hint },
+];
+
+export const initialPins: Pin[] = [
+  {
+    id: 'pin-1',
+    giver: initialUsers[1],
+    receiver: initialUsers[0],
+    reason: 'A build quebrou de novo!',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+  },
+  {
+    id: 'pin-2',
+    giver: initialUsers[2],
+    receiver: initialUsers[1],
+    reason: 'Esqueceu de mutar na reunião geral.',
+    timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000), // 23 hours ago
+  },
+  {
+    id: 'pin-3',
+    giver: initialUsers[0],
+    receiver: initialUsers[2],
+    reason: 'Usou "Responder a Todos" em um e-mail para toda a empresa.',
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+  },
+  {
+    id: 'pin-4',
+    giver: initialUsers[3],
+    receiver: initialUsers[0],
+    reason: 'A máquina de café está vazia.',
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+  },
+  {
+    id: 'pin-5',
+    giver: initialUsers[4],
+    receiver: initialUsers[3],
+    reason: 'Meu PR está aguardando revisão há 3 dias.',
+    timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+  },
+];

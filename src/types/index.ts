@@ -1,10 +1,12 @@
 export interface User {
   id: string;
+  uid: string;
   name: string;
   email: string;
   avatar: string;
   points: number;
   hint?: string;
+  role: 'admin' | 'user';
 }
 
 export interface Pin {

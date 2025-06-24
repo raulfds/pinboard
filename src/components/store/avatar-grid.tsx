@@ -6,25 +6,25 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Flame } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
-interface AvatarGridProps {
-  avatars: Avatar[];
-  currentUserPoints: number;
-}
-
-export default function AvatarGrid({ avatars, currentUserPoints }: AvatarGridProps) {
+export default function AvatarGrid() {
   const { toast } = useToast();
+  const { avatars, currentUser } = useApp();
+
+  if (!currentUser) return null;
 
   const handleBuy = (avatar: Avatar) => {
-    if (currentUserPoints >= avatar.price) {
+    if (currentUser.points >= avatar.price) {
       toast({
         title: 'Compra Realizada!',
         description: `Você desbloqueou o avatar "${avatar.name}".`,
       });
+      // Here you would typically call a function from context to update user's avatar and points
     } else {
       toast({
         title: 'Pontos insuficientes',
-        description: `Você precisa de mais ${avatar.price - currentUserPoints} pontos para comprar isto.`,
+        description: `Você precisa de mais ${avatar.price - currentUser.points} pontos para comprar isto.`,
         variant: 'destructive',
       });
     }
@@ -51,7 +51,7 @@ export default function AvatarGrid({ avatars, currentUserPoints }: AvatarGridPro
             <Button
               className="w-full"
               onClick={() => handleBuy(avatar)}
-              disabled={currentUserPoints < avatar.price && avatar.price > 0}
+              disabled={currentUser.points < avatar.price && avatar.price > 0}
             >
               {avatar.price === 0 ? 'Padrão' : (
                 <>

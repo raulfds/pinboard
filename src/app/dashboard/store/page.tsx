@@ -1,8 +1,12 @@
+'use client';
+
 import AvatarGrid from '@/components/store/avatar-grid';
-import { users, avatars } from '@/lib/data';
+import { useApp } from '@/context/AppContext';
 
 export default function StorePage() {
-  const currentUser = users[0];
+  const { currentUser } = useApp();
+
+  if (!currentUser) return null;
 
   return (
     <div className="container mx-auto">
@@ -12,7 +16,7 @@ export default function StorePage() {
           Seus Pontos: <span className="font-bold">{currentUser.points}</span>
         </div>
       </div>
-      <AvatarGrid avatars={avatars} currentUserPoints={currentUser.points} />
+      <AvatarGrid />
     </div>
   );
 }

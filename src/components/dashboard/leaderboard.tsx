@@ -1,3 +1,5 @@
+'use client';
+
 import type { User } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -10,12 +12,10 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
-interface LeaderboardProps {
-  users: User[];
-}
-
-export default function Leaderboard({ users }: LeaderboardProps) {
+export default function Leaderboard() {
+  const { users } = useApp();
   const sortedUsers = [...users].sort((a, b) => b.points - a.points);
 
   return (

@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { Flame, LayoutGrid, Store, User as UserIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Flame, LayoutGrid, Store, User as UserIcon, LogOut, Shield, ChevronDown } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -13,14 +16,30 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { users } from '@/lib/data';
+import { useApp } from '@/context/AppContext';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const currentUser = users[0];
+  const { currentUser, logout, loading } = useApp();
+  const router = useRouter();
+
+  if (loading) {
+    return (
+       <div className="flex h-screen w-full items-center justify-center">
+        <Flame className="h-12 w-12 animate-pulse text-primary" />
+      </div>
+    )
+  }
+
+  if (!currentUser) {
+    router.replace('/');
+    return null;
+  }
 
   return (
     <SidebarProvider>
@@ -51,19 +70,42 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
+             {currentUser.role === 'admin' && (
+              <SidebarMenuItem>
+                <Link href="/admin" className="w-full">
+                  <SidebarMenuButton>
+                    <Shield />
+                    Painel Admin
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-muted">
-            <Avatar>
-              <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="fire character"/>
-              <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-semibold">{currentUser.name}</span>
-              <span className="text-sm text-muted-foreground">{currentUser.points} Pontos</span>
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start h-auto p-2">
+                <div className="flex items-center gap-3 w-full">
+                  <Avatar>
+                    <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="fire character"/>
+                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col text-left">
+                    <span className="font-semibold">{currentUser.name}</span>
+                    <span className="text-sm text-muted-foreground">{currentUser.points} Pontos</span>
+                  </div>
+                  <ChevronDown className="ml-auto h-4 w-4" />
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 mb-2" align="end">
+              <DropdownMenuItem onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>

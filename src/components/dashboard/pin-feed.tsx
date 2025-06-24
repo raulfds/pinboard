@@ -13,10 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ArrowRight, MessageSquare } from 'lucide-react';
-
-interface PinFeedProps {
-  pins: Pin[];
-}
+import { useApp } from '@/context/AppContext';
 
 const filterPins = (pins: Pin[], filter: 'day' | 'week' | 'month') => {
   const now = new Date();
@@ -32,7 +29,8 @@ const filterPins = (pins: Pin[], filter: 'day' | 'week' | 'month') => {
   });
 };
 
-export default function PinFeed({ pins }: PinFeedProps) {
+export default function PinFeed() {
+  const { pins } = useApp();
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('week');
   const filteredPins = filterPins(pins, filter).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 

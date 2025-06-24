@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import type { User } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,18 +23,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Flame } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
-interface GivePinDialogProps {
-  users: User[];
-  onPinGiven: (data: { receiverId: string; reason: string }) => void;
-}
-
-export default function GivePinDialog({ users, onPinGiven }: GivePinDialogProps) {
+export default function GivePinDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const { currentUser, users, givePin } = useApp();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!currentUser) return;
+
     const formData = new FormData(event.currentTarget);
     const receiverId = formData.get('receiver') as string;
     const reason = formData.get('reason') as string;
@@ -49,7 +47,7 @@ export default function GivePinDialog({ users, onPinGiven }: GivePinDialogProps)
       return;
     }
     
-    onPinGiven({ receiverId, reason });
+    givePin(currentUser.id, receiverId, reason);
     
     const receiver = users.find(u => u.id === receiverId);
     toast({
@@ -58,9 +56,10 @@ export default function GivePinDialog({ users, onPinGiven }: GivePinDialogProps)
     });
     
     setOpen(false);
-    // Reset form for next time
     event.currentTarget.reset();
   };
+
+  const otherUsers = users.filter(u => u.id !== currentUser?.id);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -87,7 +86,7 @@ export default function GivePinDialog({ users, onPinGiven }: GivePinDialogProps)
                   <SelectValue placeholder="Selecione um usuário" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users.map((user) => (
+                  {otherUsers.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
                     </SelectItem>
