@@ -8,11 +8,6 @@ export const users: User[] = [
   { id: 'user-5', name: 'Chen', email: 'chen@example.com', avatar: 'https://placehold.co/100x100.png', points: 42 },
 ];
 
-// Set initial avatar for all users
-users.forEach(user => {
-  user.avatar = 'https://placehold.co/100x100.png';
-});
-
 export const pins: Pin[] = [
   {
     id: 'pin-1',
@@ -60,13 +55,8 @@ export const avatars: Avatar[] = [
   { id: 'avatar-6', name: 'Maleficent', image: 'https://placehold.co/200x200.png', price: 150, hint: 'evil fairy' },
 ];
 
-users[0].avatar = avatars[0].image;
-users[0].hint = avatars[0].hint;
-users[1].avatar = avatars[0].image;
-users[1].hint = avatars[0].hint;
-users[2].avatar = avatars[0].image;
-users[2].hint = avatars[0].hint;
-users[3].avatar = avatars[0].image;
-users[3].hint = avatars[0].hint;
-users[4].avatar = avatars[0].image;
-users[4].hint = avatars[0].hint;
+// Set initial avatar for all users
+users.forEach(user => {
+  user.avatar = avatars[0].image;
+  user.hint = avatars[0].hint;
+});

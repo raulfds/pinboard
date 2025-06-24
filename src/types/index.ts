@@ -4,6 +4,7 @@ export interface User {
   email: string;
   avatar: string;
   points: number;
+  hint?: string;
 }
 
 export interface Pin {
