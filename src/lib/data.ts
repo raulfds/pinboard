@@ -1,0 +1,72 @@
+import type { User, Pin, Avatar } from '@/types';
+
+export const users: User[] = [
+  { id: 'user-1', name: 'Alex', email: 'alex@example.com', avatar: 'https://placehold.co/100x100.png', points: 150 },
+  { id: 'user-2', name: 'Maria', email: 'maria@example.com', avatar: 'https://placehold.co/100x100.png', points: 25 },
+  { id: 'user-3', name: 'David', email: 'david@example.com', avatar: 'https://placehold.co/100x100.png', points: 88 },
+  { id: 'user-4', name: 'Sophia', email: 'sophia@example.com', avatar: 'https://placehold.co/100x100.png', points: 12 },
+  { id: 'user-5', name: 'Chen', email: 'chen@example.com', avatar: 'https://placehold.co/100x100.png', points: 42 },
+];
+
+// Set initial avatar for all users
+users.forEach(user => {
+  user.avatar = 'https://placehold.co/100x100.png';
+});
+
+export const pins: Pin[] = [
+  {
+    id: 'pin-1',
+    giver: users[1],
+    receiver: users[0],
+    reason: 'The build broke again!',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+  },
+  {
+    id: 'pin-2',
+    giver: users[2],
+    receiver: users[1],
+    reason: 'Forgot to mute on the all-hands call.',
+    timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000), // 23 hours ago
+  },
+  {
+    id: 'pin-3',
+    giver: users[0],
+    receiver: users[2],
+    reason: 'Used "Reply All" on a company-wide email.',
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+  },
+  {
+    id: 'pin-4',
+    giver: users[3],
+    receiver: users[0],
+    reason: 'The coffee machine is empty.',
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+  },
+  {
+    id: 'pin-5',
+    giver: users[4],
+    receiver: users[3],
+    reason: 'My PR has been waiting for review for 3 days.',
+    timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+  },
+];
+
+export const avatars: Avatar[] = [
+  { id: 'avatar-1', name: 'Ember', image: 'https://placehold.co/200x200.png', price: 0, hint: 'fire character' },
+  { id: 'avatar-2', name: 'Anger', image: 'https://placehold.co/200x200.png', price: 50, hint: 'red angry' },
+  { id: 'avatar-3', name: 'Hades', image: 'https://placehold.co/200x200.png', price: 75, hint: 'blue flame' },
+  { id: 'avatar-4', name: 'The Hulk', image: 'https://placehold.co/200x200.png', price: 100, hint: 'green monster' },
+  { id: 'avatar-5', name: 'Red Queen', image: 'https://placehold.co/200x200.png', price: 120, hint: 'queen big head' },
+  { id: 'avatar-6', name: 'Maleficent', image: 'https://placehold.co/200x200.png', price: 150, hint: 'evil fairy' },
+];
+
+users[0].avatar = avatars[0].image;
+users[0].hint = avatars[0].hint;
+users[1].avatar = avatars[0].image;
+users[1].hint = avatars[0].hint;
+users[2].avatar = avatars[0].image;
+users[2].hint = avatars[0].hint;
+users[3].avatar = avatars[0].image;
+users[3].hint = avatars[0].hint;
+users[4].avatar = avatars[0].image;
+users[4].hint = avatars[0].hint;
