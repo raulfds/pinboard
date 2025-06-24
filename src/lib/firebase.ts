@@ -16,19 +16,31 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 
-// Validação para garantir que as variáveis de ambiente foram configuradas
-if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX") {
-    // Inicializa o Firebase
-    try {
-        app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-        auth = getAuth(app);
-    } catch (error) {
-        console.error("Erro ao inicializar o Firebase. Verifique suas credenciais:", error);
-        app = null;
-        auth = null;
+// Validate that all required Firebase config values are present before initializing
+if (
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId
+) {
+  try {
+    // Check if Firebase app is already initialized to prevent errors
+    if (!getApps().length) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApp();
     }
+    auth = getAuth(app);
+  } catch (error) {
+    console.error("Firebase initialization failed:", error);
+    // Ensure app and auth are null if initialization fails
+    app = null;
+    auth = null;
+  }
 } else {
-    console.error("Configuração do Firebase está incompleta. Verifique seu arquivo .env.local. A autenticação estará desabilitada.");
+  // This warning is helpful for developers to know why Firebase is not working.
+  console.warn(
+    "Firebase configuration is incomplete. Please check your .env.local file. Authentication features will be disabled."
+  );
 }
 
 export { app, auth };
