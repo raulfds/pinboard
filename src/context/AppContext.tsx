@@ -37,6 +37,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [avatars, setAvatars] = useState<Avatar[]>(initialAvatars);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      console.warn("Firebase auth is not configured. User features will be disabled.");
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         let user = users.find(u => u.email === firebaseUser.email);
@@ -64,6 +69,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [users]);
 
   const loginWithGoogle = async () => {
+    if (!auth) {
+        toast({ title: 'Erro de Configuração', description: 'A autenticação com Firebase não está configurada. Verifique suas credenciais.', variant: 'destructive' });
+        return;
+    }
     setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -78,6 +87,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    if (!auth) {
+        toast({ title: 'Erro de Configuração', description: 'A autenticação com Firebase não está configurada.', variant: 'destructive' });
+        return;
+    }
     await signOut(auth);
     router.push('/');
     toast({ title: 'Você saiu da sua conta.' });
