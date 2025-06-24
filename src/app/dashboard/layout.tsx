@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { Flame, LayoutGrid, Store, User as UserIcon, LogOut, Shield, ChevronDown } from 'lucide-react';
 import {
   Sidebar,
@@ -28,17 +29,18 @@ export default function DashboardLayout({
   const { currentUser, logout, loading } = useApp();
   const router = useRouter();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      router.replace('/');
+    }
+  }, [loading, currentUser, router]);
+
+  if (loading || !currentUser) {
     return (
        <div className="flex h-screen w-full items-center justify-center">
         <Flame className="h-12 w-12 animate-pulse text-primary" />
       </div>
     )
-  }
-
-  if (!currentUser) {
-    router.replace('/');
-    return null;
   }
 
   return (
