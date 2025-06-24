@@ -79,9 +79,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await signInWithPopup(auth, provider);
       router.push('/dashboard');
       toast({ title: 'Login bem-sucedido!' });
-    } catch (error) {
+    } catch (error: any) {
+      if (error.code === 'auth/unauthorized-domain') {
+        toast({
+          title: 'Domínio não autorizado',
+          description: `O domínio "${window.location.hostname}" não está autorizado para login. Adicione-o no painel do Firebase em Authentication > Settings > Authorized domains.`,
+          variant: 'destructive',
+          duration: 10000,
+        });
+      } else {
+         toast({ title: 'Erro no login', description: 'Não foi possível fazer login com o Google.', variant: 'destructive' });
+      }
       console.error("Erro no login com Google:", error);
-      toast({ title: 'Erro no login', description: 'Não foi possível fazer login com o Google.', variant: 'destructive' });
       setLoading(false);
     }
   };
