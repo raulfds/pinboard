@@ -13,35 +13,35 @@ export const pins: Pin[] = [
     id: 'pin-1',
     giver: users[1],
     receiver: users[0],
-    reason: 'The build broke again!',
+    reason: 'A build quebrou de novo!',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
   },
   {
     id: 'pin-2',
     giver: users[2],
     receiver: users[1],
-    reason: 'Forgot to mute on the all-hands call.',
+    reason: 'Esqueceu de mutar na reunião geral.',
     timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000), // 23 hours ago
   },
   {
     id: 'pin-3',
     giver: users[0],
     receiver: users[2],
-    reason: 'Used "Reply All" on a company-wide email.',
+    reason: 'Usou "Responder a Todos" em um e-mail para toda a empresa.',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
   },
   {
     id: 'pin-4',
     giver: users[3],
     receiver: users[0],
-    reason: 'The coffee machine is empty.',
+    reason: 'A máquina de café está vazia.',
     timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
   },
   {
     id: 'pin-5',
     giver: users[4],
     receiver: users[3],
-    reason: 'My PR has been waiting for review for 3 days.',
+    reason: 'Meu PR está aguardando revisão há 3 dias.',
     timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
   },
 ];

@@ -18,13 +18,13 @@ export default function AvatarGrid({ avatars, currentUserPoints }: AvatarGridPro
   const handleBuy = (avatar: Avatar) => {
     if (currentUserPoints >= avatar.price) {
       toast({
-        title: 'Purchase Successful!',
-        description: `You've unlocked the "${avatar.name}" avatar.`,
+        title: 'Compra Realizada!',
+        description: `Você desbloqueou o avatar "${avatar.name}".`,
       });
     } else {
       toast({
-        title: 'Not enough points',
-        description: `You need ${avatar.price - currentUserPoints} more points to buy this.`,
+        title: 'Pontos insuficientes',
+        description: `Você precisa de mais ${avatar.price - currentUserPoints} pontos para comprar isto.`,
         variant: 'destructive',
       });
     }
@@ -53,9 +53,9 @@ export default function AvatarGrid({ avatars, currentUserPoints }: AvatarGridPro
               onClick={() => handleBuy(avatar)}
               disabled={currentUserPoints < avatar.price && avatar.price > 0}
             >
-              {avatar.price === 0 ? 'Default' : (
+              {avatar.price === 0 ? 'Padrão' : (
                 <>
-                  <Flame className="mr-2 h-4 w-4" /> {avatar.price} Points
+                  <Flame className="mr-2 h-4 w-4" /> {avatar.price} Pontos
                 </>
               )}
             </Button>

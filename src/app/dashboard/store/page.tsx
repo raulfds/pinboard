@@ -7,9 +7,9 @@ export default function StorePage() {
   return (
     <div className="container mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-3xl font-bold">Avatar Store</h1>
+        <h1 className="text-3xl font-bold">Loja de Avatares</h1>
         <div className="text-lg font-semibold text-primary rounded-lg bg-primary/10 px-4 py-2 text-center">
-          Your Points: <span className="font-bold">{currentUser.points}</span>
+          Seus Pontos: <span className="font-bold">{currentUser.points}</span>
         </div>
       </div>
       <AvatarGrid avatars={avatars} currentUserPoints={currentUser.points} />

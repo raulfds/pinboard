@@ -25,14 +25,14 @@ export default function LoginPage() {
 
     if (userExists && password) {
       toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
+        title: 'Login bem-sucedido',
+        description: 'Bem-vindo(a) de volta!',
       });
       router.push('/dashboard');
     } else {
       toast({
-        title: 'Login Failed',
-        description: 'Invalid email or password.',
+        title: 'Falha no Login',
+        description: 'E-mail ou senha inválidos.',
         variant: 'destructive',
       });
     }
@@ -48,27 +48,27 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-3xl font-bold text-primary">Pinboard</CardTitle>
           <CardDescription className="text-muted-foreground pt-2">
-            Sign in to your account to continue.
+            Faça login em sua conta para continuar.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input id="email" name="email" type="email" placeholder="m@example.com" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input id="password" name="password" type="password" required />
             </div>
             <Button type="submit" className="w-full" size="lg">
-              Login
+              Entrar
             </Button>
           </form>
            <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
+            Não tem uma conta?{' '}
             <Link href="#" className="underline">
-              Sign up
+              Cadastre-se
             </Link>
           </div>
         </CardContent>

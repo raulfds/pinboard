@@ -39,7 +39,7 @@ export default function DashboardLayout({
               <Link href="/dashboard" className="w-full">
                 <SidebarMenuButton>
                   <LayoutGrid />
-                  Dashboard
+                  Painel
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -47,7 +47,7 @@ export default function DashboardLayout({
               <Link href="/dashboard/store" className="w-full">
                 <SidebarMenuButton>
                   <Store />
-                  Avatar Store
+                  Loja de Avatares
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -61,7 +61,7 @@ export default function DashboardLayout({
             </Avatar>
             <div className="flex flex-col">
               <span className="font-semibold">{currentUser.name}</span>
-              <span className="text-sm text-muted-foreground">{currentUser.points} Points</span>
+              <span className="text-sm text-muted-foreground">{currentUser.points} Pontos</span>
             </div>
           </div>
         </SidebarFooter>

@@ -21,16 +21,16 @@ export default function Leaderboard({ users }: LeaderboardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Leaderboard</CardTitle>
+        <CardTitle>Placar de Líderes</CardTitle>
         <Trophy className="h-6 w-6 text-primary" />
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">Rank</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead className="text-right">Points</TableHead>
+              <TableHead className="w-[50px]">Pos.</TableHead>
+              <TableHead>Usuário</TableHead>
+              <TableHead className="text-right">Pontos</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

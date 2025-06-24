@@ -5,13 +5,13 @@ import { useState } from 'react';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { ArrowRight, MessageSquare } from 'lucide-react';
 
 interface PinFeedProps {
@@ -34,21 +34,21 @@ const filterPins = (pins: Pin[], filter: 'day' | 'week' | 'month') => {
 
 export default function PinFeed({ pins }: PinFeedProps) {
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('week');
-  const filteredPins = filterPins(pins, filter);
+  const filteredPins = filterPins(pins, filter).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle>Recent Pins</CardTitle>
+          <CardTitle>PINs Recentes</CardTitle>
           <Tabs
             defaultValue="week"
             onValueChange={(value) => setFilter(value as any)}
           >
             <TabsList>
-              <TabsTrigger value="day">Day</TabsTrigger>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="month">Month</TabsTrigger>
+              <TabsTrigger value="day">Dia</TabsTrigger>
+              <TabsTrigger value="week">Semana</TabsTrigger>
+              <TabsTrigger value="month">Mês</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -75,6 +75,7 @@ export default function PinFeed({ pins }: PinFeedProps) {
                   <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(pin.timestamp), {
                       addSuffix: true,
+                      locale: ptBR,
                     })}
                   </span>
                 </div>
@@ -86,7 +87,7 @@ export default function PinFeed({ pins }: PinFeedProps) {
             ))
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No pins in this period. Everyone is happy!</p>
+              <p>Nenhum PIN neste período. Todos estão felizes!</p>
             </div>
           )}
         </div>
