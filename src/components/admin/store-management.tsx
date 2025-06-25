@@ -71,7 +71,14 @@ export default function StoreManagement() {
           {avatars.map((avatar) => (
             <TableRow key={avatar.id}>
               <TableCell>
-                <Image src={avatar.image} alt={avatar.name} width={40} height={40} className="rounded-md" />
+                <Image 
+                  src={avatar.image} 
+                  alt={avatar.name} 
+                  width={80} 
+                  height={80} 
+                  className="rounded-md"
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/80x80?text=Avatar'; }}
+                />
               </TableCell>
               <TableCell>{avatar.name}</TableCell>
               <TableCell>{avatar.price}</TableCell>
