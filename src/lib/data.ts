@@ -1,12 +1,7 @@
 import type { User, Pin, Avatar } from '@/types';
 
 export const initialAvatars: Avatar[] = [
-  { id: 'avatar-1', name: 'Ember', image: 'https://placehold.co/200x200.png', price: 0, hint: 'fire character' },
-  { id: 'avatar-2', name: 'Anger', image: 'https://placehold.co/200x200.png', price: 50, hint: 'red angry' },
-  { id: 'avatar-3', name: 'Hades', image: 'https://placehold.co/200x200.png', price: 75, hint: 'blue flame' },
-  { id: 'avatar-4', name: 'The Hulk', image: 'https://placehold.co/200x200.png', price: 100, hint: 'green monster' },
-  { id: 'avatar-5', name: 'Red Queen', image: 'https://placehold.co/200x200.png', price: 120, hint: 'queen big head' },
-  { id: 'avatar-6', name: 'Maleficent', image: 'https://placehold.co/200x200.png', price: 150, hint: 'evil fairy' },
+  // Array vazio para garantir que só os avatares do Supabase sejam usados
 ];
 
 export const initialUsers: User[] = [
