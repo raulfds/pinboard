@@ -98,12 +98,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Carregar PINs do Supabase e escutar em tempo real
   useEffect(() => {
     const fetchPins = async () => {
-      const { data, error } = await supabase.from('pins').select('*').order('timestamp', { ascending: false });
+      // Buscar pins com join dos usuários
+      const { data, error } = await supabase
+        .from('pins')
+        .select('id, reason, timestamp, giver:users!pins_giver_id_fkey(*), receiver:users!pins_receiver_id_fkey(*)')
+        .order('timestamp', { ascending: false });
       if (error) {
         toast({ title: 'Erro ao carregar PINs', description: error.message, variant: 'destructive' });
         return;
       }
-      setPins(data || []);
+      // Adaptar formato para o frontend
+      const pinsAdapted = (data || []).map((pin: any) => ({
+        id: pin.id,
+        giver: pin.giver,
+        receiver: pin.receiver,
+        reason: pin.reason,
+        timestamp: new Date(pin.timestamp),
+      }));
+      setPins(pinsAdapted);
     };
     fetchPins();
 
@@ -151,22 +163,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!error) toast({ title: 'Usuário removido com sucesso.' });
   };
 
-  // Avatares continuam locais por enquanto
-  const addAvatar = (avatarData: Omit<Avatar, 'id'>) => {
-    const newAvatar: Avatar = { ...avatarData, id: `avatar-${Date.now()}` };
-    setAvatars(prev => [...prev, newAvatar]);
-    toast({ title: 'Avatar adicionado com sucesso!'});
-  }
+  // Carregar avatares do Supabase
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const { data, error } = await supabase.from('avatars').select('*');
+      if (error) {
+        toast({ title: 'Erro ao carregar avatares', description: error.message, variant: 'destructive' });
+        return;
+      }
+      setAvatars(data || []);
+    };
+    fetchAvatars();
+  }, []);
 
-  const updateAvatar = (updatedAvatar: Avatar) => {
+  // Função para adicionar avatar no Supabase
+  const addAvatar = async (avatarData: Omit<Avatar, 'id'>) => {
+    const { data, error } = await supabase.from('avatars').insert([avatarData]).select();
+    if (error) {
+      toast({ title: 'Erro ao adicionar avatar', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setAvatars(prev => [...prev, ...(data || [])]);
+    toast({ title: 'Avatar adicionado com sucesso!'});
+  };
+
+  // Função para atualizar avatar no Supabase
+  const updateAvatar = async (updatedAvatar: Avatar) => {
+    const { error } = await supabase.from('avatars').update(updatedAvatar).eq('id', updatedAvatar.id);
+    if (error) {
+      toast({ title: 'Erro ao atualizar avatar', description: error.message, variant: 'destructive' });
+      return;
+    }
     setAvatars(prev => prev.map(a => a.id === updatedAvatar.id ? updatedAvatar : a));
     toast({ title: 'Avatar atualizado com sucesso!'});
-  }
+  };
 
-  const removeAvatar = (avatarId: string) => {
+  // Função para remover avatar no Supabase
+  const removeAvatar = async (avatarId: string) => {
+    const { error } = await supabase.from('avatars').delete().eq('id', avatarId);
+    if (error) {
+      toast({ title: 'Erro ao remover avatar', description: error.message, variant: 'destructive' });
+      return;
+    }
     setAvatars(prev => prev.filter(a => a.id !== avatarId));
     toast({ title: 'Avatar removido com sucesso!'});
-  }
+  };
 
   // Substituir loginWithGoogle para usar Supabase Auth
   const loginWithGoogle = async () => {
