@@ -40,15 +40,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const getSession = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (data?.user) {
-        // Verificar se o e-mail está convidado
-        const { data: invite } = await supabase.from('invites').select('email').eq('email', data.user.email).single();
-        if (!invite && data.user.email !== 'raulferreiradesouza@gmail.com') {
-          await supabase.auth.signOut();
-          setCurrentUser(null);
-          toast({ title: 'Acesso negado', description: 'Seu e-mail não está autorizado. Solicite um convite ao administrador.', variant: 'destructive' });
-          setLoading(false);
-          return;
-        }
+        // Removido o bloqueio de convite/email, qualquer email pode logar
         // Buscar usuário no banco pelo email
         const { data: userDb } = await supabase.from('users').select('*').eq('email', data.user.email).single();
         if (userDb) {
