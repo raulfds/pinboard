@@ -73,7 +73,7 @@ export default function StoreManagement() {
               <TableRow key={avatar.id}>
                 <TableCell>
                   <Image 
-                    src={avatar.image || 'https://placehold.co/80x80?text=Avatar'} 
+                    src={(avatar.image ? avatar.image.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/80x80?text=Avatar')} 
                     alt={avatar.name || 'Avatar'} 
                     width={80} 
                     height={80} 

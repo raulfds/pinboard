@@ -90,7 +90,7 @@ export default function DashboardLayout({
               <Button variant="ghost" className="w-full justify-start h-auto p-2">
                 <div className="flex items-center gap-3 w-full">
                   <Avatar>
-                    <AvatarImage src={currentUser.avatar || 'https://placehold.co/40x40?text=Avatar'} alt={currentUser.name || 'Avatar'} data-ai-hint="fire character"/>
+                    <AvatarImage src={(currentUser.avatar ? currentUser.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={currentUser.name || 'Avatar'} data-ai-hint="fire character"/>
                     <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col text-left">

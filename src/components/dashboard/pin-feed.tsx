@@ -61,7 +61,7 @@ export default function PinFeed() {
                     <Avatar className="h-6 w-6">
                       {pin.giver.avatar && (
                         <>
-                          <AvatarImage src={pin.giver.avatar || 'https://placehold.co/40x40?text=Avatar'} alt={pin.giver.name || 'Avatar'} data-ai-hint="fire character"/>
+                          <AvatarImage src={(pin.giver.avatar ? pin.giver.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.giver.name || 'Avatar'} data-ai-hint="fire character"/>
                           <AvatarFallback>{pin.giver.name.charAt(0)}</AvatarFallback>
                         </>
                       )}
@@ -71,7 +71,7 @@ export default function PinFeed() {
                      <Avatar className="h-6 w-6">
                       {pin.receiver.avatar && (
                         <>
-                          <AvatarImage src={pin.receiver.avatar || 'https://placehold.co/40x40?text=Avatar'} alt={pin.receiver.name || 'Avatar'} data-ai-hint="fire character" />
+                          <AvatarImage src={(pin.receiver.avatar ? pin.receiver.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.receiver.name || 'Avatar'} data-ai-hint="fire character" />
                           <AvatarFallback>{pin.receiver.name.charAt(0)}</AvatarFallback>
                         </>
                       )}

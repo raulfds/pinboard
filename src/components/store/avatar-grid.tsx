@@ -39,7 +39,7 @@ export default function AvatarGrid() {
           </CardHeader>
           <CardContent className="flex-grow flex items-center justify-center">
             <Image
-              src={avatar.image || 'https://placehold.co/200x200?text=Avatar'}
+              src={(avatar.image ? avatar.image.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/200x200?text=Avatar')}
               alt={avatar.name || 'Avatar'}
               width={200}
               height={200}

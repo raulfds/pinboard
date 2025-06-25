@@ -79,7 +79,7 @@ export default function Leaderboard() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar || 'https://placehold.co/40x40?text=Avatar'} alt={user.name || 'Avatar'} data-ai-hint="fire character" />
+                      <AvatarImage src={(user.avatar ? user.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={user.name || 'Avatar'} data-ai-hint="fire character" />
                       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{user.name}</span>
