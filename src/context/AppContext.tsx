@@ -119,9 +119,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     fetchPins();
 
-    // Escuta em tempo real
-    const channel = supabase.channel('realtime-pins')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pins' }, (payload) => {
+    // Escuta em tempo real usando on('postgres_changes')
+    const channel = supabase
+      .channel('public:pins')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pins' }, () => {
         fetchPins();
       })
       .subscribe();
