@@ -7,6 +7,7 @@ import { auth } from '@/lib/firebase';
 import type { User, Pin, Avatar } from '@/types';
 import { initialUsers, initialPins, initialAvatars } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 interface AppContextType {
   currentUser: User | null;
@@ -32,41 +33,95 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [pins, setPins] = useState<Pin[]>(initialPins);
+  const [users, setUsers] = useState<User[]>([]);
+  const [pins, setPins] = useState<Pin[]>([]);
   const [avatars, setAvatars] = useState<Avatar[]>(initialAvatars);
 
+  // Carregar usuários do Supabase
   useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      console.warn("Firebase auth is not configured. User features will be disabled.");
+    const fetchUsers = async () => {
+      const { data, error } = await supabase.from('users').select('*');
+      if (error) {
+        toast({ title: 'Erro ao carregar usuários', description: error.message, variant: 'destructive' });
+        return;
+      }
+      setUsers(data || []);
+    };
+    fetchUsers();
+  }, []);
+
+  // Carregar PINs do Supabase e escutar em tempo real
+  useEffect(() => {
+    const fetchPins = async () => {
+      const { data, error } = await supabase.from('pins').select('*').order('timestamp', { ascending: false });
+      if (error) {
+        toast({ title: 'Erro ao carregar PINs', description: error.message, variant: 'destructive' });
+        return;
+      }
+      setPins(data || []);
+    };
+    fetchPins();
+
+    // Escuta em tempo real
+    const channel = supabase.channel('realtime-pins')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pins' }, (payload) => {
+        fetchPins();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Função para dar um PIN (persistir no Supabase)
+  const givePin = async (giverId: string, receiverId: string, reason: string) => {
+    const giver = users.find(u => u.id === giverId);
+    const receiver = users.find(u => u.id === receiverId);
+    if (!giver || !receiver) return;
+
+    const newPin = {
+      giver_id: giver.id,
+      receiver_id: receiver.id,
+      reason,
+      timestamp: new Date().toISOString(),
+    };
+    const { error } = await supabase.from('pins').insert([newPin]);
+    if (error) {
+      toast({ title: 'Erro ao dar PIN', description: error.message, variant: 'destructive' });
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        let user = users.find(u => u.email === firebaseUser.email);
-        if (!user) {
-          // Auto-register new user
-          user = {
-            id: `user-${Date.now()}`,
-            uid: firebaseUser.uid,
-            name: firebaseUser.displayName || 'Novo Usuário',
-            email: firebaseUser.email!,
-            avatar: initialAvatars[0].image,
-            points: 0,
-            role: 'user',
-            hint: initialAvatars[0].hint,
-          };
-          setUsers(prev => [...prev, user!]);
-        }
-        setCurrentUser(user);
-      } else {
-        setCurrentUser(null);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [users]);
+    // Atualizar pontos do receiver
+    await supabase.from('users').update({ points: receiver.points + 1 }).eq('id', receiver.id);
+  };
+
+  // Função para invalidar PIN (remover do Supabase)
+  const invalidatePin = async (pinId: string) => {
+    const { error } = await supabase.from('pins').delete().eq('id', pinId);
+    if (!error) toast({ title: 'PIN invalidado com sucesso.' });
+  };
+
+  // Função para remover usuário
+  const removeUser = async (userId: string) => {
+    const { error } = await supabase.from('users').delete().eq('id', userId);
+    if (!error) toast({ title: 'Usuário removido com sucesso.' });
+  };
+
+  // Avatares continuam locais por enquanto
+  const addAvatar = (avatarData: Omit<Avatar, 'id'>) => {
+    const newAvatar: Avatar = { ...avatarData, id: `avatar-${Date.now()}` };
+    setAvatars(prev => [...prev, newAvatar]);
+    toast({ title: 'Avatar adicionado com sucesso!'});
+  }
+
+  const updateAvatar = (updatedAvatar: Avatar) => {
+    setAvatars(prev => prev.map(a => a.id === updatedAvatar.id ? updatedAvatar : a));
+    toast({ title: 'Avatar atualizado com sucesso!'});
+  }
+
+  const removeAvatar = (avatarId: string) => {
+    setAvatars(prev => prev.filter(a => a.id !== avatarId));
+    toast({ title: 'Avatar removido com sucesso!'});
+  }
 
   const loginWithGoogle = async () => {
     if (!auth) {
@@ -104,49 +159,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     router.push('/');
     toast({ title: 'Você saiu da sua conta.' });
   };
-
-  const givePin = (giverId: string, receiverId: string, reason: string) => {
-    const giver = users.find(u => u.id === giverId);
-    const receiver = users.find(u => u.id === receiverId);
-    if (!giver || !receiver) return;
-
-    const newPin: Pin = {
-      id: `pin-${Date.now()}`,
-      giver,
-      receiver,
-      reason,
-      timestamp: new Date(),
-    };
-
-    setPins(prev => [newPin, ...prev]);
-    setUsers(prev => prev.map(u => u.id === receiverId ? { ...u, points: u.points + 1 } : u));
-  };
-
-  const invalidatePin = (pinId: string) => {
-    setPins(prev => prev.filter(p => p.id !== pinId));
-    toast({ title: 'PIN invalidado com sucesso.' });
-  };
-  
-  const removeUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    toast({ title: 'Usuário removido com sucesso.' });
-  }
-
-  const addAvatar = (avatarData: Omit<Avatar, 'id'>) => {
-    const newAvatar: Avatar = { ...avatarData, id: `avatar-${Date.now()}` };
-    setAvatars(prev => [...prev, newAvatar]);
-    toast({ title: 'Avatar adicionado com sucesso!'});
-  }
-
-  const updateAvatar = (updatedAvatar: Avatar) => {
-    setAvatars(prev => prev.map(a => a.id === updatedAvatar.id ? updatedAvatar : a));
-    toast({ title: 'Avatar atualizado com sucesso!'});
-  }
-
-  const removeAvatar = (avatarId: string) => {
-    setAvatars(prev => prev.filter(a => a.id !== avatarId));
-    toast({ title: 'Avatar removido com sucesso!'});
-  }
 
   const value = {
     currentUser,
