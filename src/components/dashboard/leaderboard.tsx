@@ -1,6 +1,6 @@
 'use client';
 
-import type { User } from '@/types';
+import type { User, Pin } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -13,16 +13,55 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useState } from 'react';
 
 export default function Leaderboard() {
-  const { users } = useApp();
-  const sortedUsers = [...users].sort((a, b) => b.points - a.points);
+  const { users, pins } = useApp();
+  const [filter, setFilter] = useState<'day' | 'week' | 'month' | 'all'>('all');
+
+  // Função para filtrar pins por período
+  const filterPins = (pins: Pin[], filter: 'day' | 'week' | 'month' | 'all') => {
+    const now = new Date();
+    return pins.filter((pin) => {
+      const pinDate = new Date(pin.timestamp);
+      const diff = now.getTime() - pinDate.getTime();
+      const days = diff / (1000 * 3600 * 24);
+      if (filter === 'day') return days <= 1;
+      if (filter === 'week') return days <= 7;
+      if (filter === 'month') return days <= 30;
+      return true;
+    });
+  };
+
+  // Calcular pontos recebidos por usuário no período
+  const filteredPins = filterPins(pins, filter);
+  const userPoints: Record<string, number> = {};
+  filteredPins.forEach(pin => {
+    if (!userPoints[pin.receiver.id]) userPoints[pin.receiver.id] = 0;
+    userPoints[pin.receiver.id] += 1;
+  });
+
+  const sortedUsers = [...users]
+    .map(user => ({ ...user, points: userPoints[user.id] || 0 }))
+    .sort((a, b) => b.points - a.points);
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Placar de Líderes</CardTitle>
-        <Trophy className="h-6 w-6 text-primary" />
+        <div className="flex gap-2 items-center">
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={filter}
+            onChange={e => setFilter(e.target.value as any)}
+          >
+            <option value="day">Dia</option>
+            <option value="week">Semana</option>
+            <option value="month">Mês</option>
+            <option value="all">Total</option>
+          </select>
+          <Trophy className="h-6 w-6 text-primary" />
+        </div>
       </CardHeader>
       <CardContent>
         <Table>

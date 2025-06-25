@@ -147,8 +147,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toast({ title: 'Erro ao dar PIN', description: error.message, variant: 'destructive' });
       return;
     }
-    // Atualizar pontos do receiver
+    // Atualizar pontos do receiver no banco
     await supabase.from('users').update({ points: receiver.points + 1 }).eq('id', receiver.id);
+    // Atualizar pontos do receiver no estado local
+    setUsers(prev => prev.map(u => u.id === receiver.id ? { ...u, points: u.points + 1 } : u));
   };
 
   // Função para invalidar PIN (remover do Supabase)
