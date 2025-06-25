@@ -7,18 +7,72 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function UserManagement() {
   const { users, removeUser, currentUser } = useApp();
+  const [invites, setInvites] = useState<string[]>([]);
+  const [inviteEmail, setInviteEmail] = useState('');
+
+  // Carregar e-mails convidados do Supabase
+  useEffect(() => {
+    const fetchInvites = async () => {
+      const { data, error } = await supabase.from('invites').select('email');
+      if (data) setInvites(data.map((i: any) => i.email));
+    };
+    fetchInvites();
+  }, []);
+
+  // Adicionar novo convite
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail) return;
+    await supabase.from('invites').insert([{ email: inviteEmail }]);
+    setInvites((prev) => [...prev, inviteEmail]);
+    setInviteEmail('');
+  };
+
+  // Remover convite
+  const handleRemoveInvite = async (email: string) => {
+    await supabase.from('invites').delete().eq('email', email);
+    setInvites((prev) => prev.filter((e) => e !== email));
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Gerenciamento de Usuários</CardTitle>
         <CardDescription>
-          Visualize e remova usuários do sistema. Novos usuários são adicionados automaticamente no primeiro login com Google.
+          Visualize e remova usuários do sistema. Novos usuários só podem logar se forem convidados por e-mail.
         </CardDescription>
       </CardHeader>
+      <div className="mb-6">
+        <form onSubmit={handleInvite} className="flex gap-2">
+          <input
+            type="email"
+            placeholder="E-mail para convite"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            className="border rounded px-2 py-1"
+            required
+          />
+          <Button type="submit">Convidar</Button>
+        </form>
+        <div className="mt-2">
+          <strong>E-mails convidados:</strong>
+          <ul className="list-disc ml-6">
+            {invites.map((email) => (
+              <li key={email} className="flex items-center gap-2">
+                {email}
+                <Button variant="destructive" size="xs" onClick={() => handleRemoveInvite(email)}>
+                  Remover
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>

@@ -2,12 +2,10 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import type { User, Pin, Avatar } from '@/types';
 import { initialUsers, initialPins, initialAvatars } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
 
 interface AppContextType {
   currentUser: User | null;
@@ -36,6 +34,61 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [users, setUsers] = useState<User[]>([]);
   const [pins, setPins] = useState<Pin[]>([]);
   const [avatars, setAvatars] = useState<Avatar[]>(initialAvatars);
+
+  // Carregar usuário autenticado do Supabase
+  useEffect(() => {
+    const getSession = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        // Verificar se o e-mail está convidado
+        const { data: invite } = await supabase.from('invites').select('email').eq('email', data.user.email).single();
+        if (!invite && data.user.email !== 'raulferreiradesouza@gmail.com') {
+          await supabase.auth.signOut();
+          setCurrentUser(null);
+          toast({ title: 'Acesso negado', description: 'Seu e-mail não está autorizado. Solicite um convite ao administrador.', variant: 'destructive' });
+          setLoading(false);
+          return;
+        }
+        // Buscar usuário no banco pelo email
+        const { data: userDb } = await supabase.from('users').select('*').eq('email', data.user.email).single();
+        if (userDb) {
+          // Se for o admin, garantir role admin
+          if (userDb.email === 'raulferreiradesouza@gmail.com' && userDb.role !== 'admin') {
+            await supabase.from('users').update({ role: 'admin' }).eq('id', userDb.id);
+            setCurrentUser({ ...userDb, role: 'admin' });
+          } else {
+            setCurrentUser(userDb);
+          }
+        } else {
+          // Se não existir, cria
+          const isAdmin = data.user.email === 'raulferreiradesouza@gmail.com';
+          const newUser = {
+            id: data.user.id,
+            uid: data.user.id,
+            name: data.user.user_metadata.full_name || data.user.email || '',
+            email: data.user.email || '',
+            avatar: '',
+            points: 0,
+            role: isAdmin ? 'admin' as const : 'user' as const,
+            hint: '',
+          };
+          await supabase.from('users').insert([newUser]);
+          setCurrentUser(newUser);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    };
+    getSession();
+    // Listener para mudanças de sessão
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      getSession();
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
 
   // Carregar usuários do Supabase
   useEffect(() => {
@@ -123,39 +176,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast({ title: 'Avatar removido com sucesso!'});
   }
 
+  // Substituir loginWithGoogle para usar Supabase Auth
   const loginWithGoogle = async () => {
-    if (!auth) {
-        toast({ title: 'Erro de Configuração', description: 'A autenticação com Firebase não está configurada. Verifique suas credenciais.', variant: 'destructive' });
-        return;
-    }
     setLoading(true);
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      router.push('/dashboard');
-      toast({ title: 'Login bem-sucedido!' });
-    } catch (error: any) {
-      if (error.code === 'auth/unauthorized-domain') {
-        toast({
-          title: 'Domínio não autorizado',
-          description: `O domínio "${window.location.hostname}" não está autorizado para login. Adicione-o no painel do Firebase em Authentication > Settings > Authorized domains.`,
-          variant: 'destructive',
-          duration: 10000,
-        });
-      } else {
-         toast({ title: 'Erro no login', description: 'Não foi possível fazer login com o Google.', variant: 'destructive' });
-      }
-      console.error("Erro no login com Google:", error);
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    if (error) {
+      toast({ title: 'Erro no login', description: error.message, variant: 'destructive' });
       setLoading(false);
     }
+    // O redirecionamento será feito automaticamente pelo Supabase
   };
 
+  // Substituir logout para usar Supabase Auth
   const logout = async () => {
-    if (!auth) {
-        toast({ title: 'Erro de Configuração', description: 'A autenticação com Firebase não está configurada.', variant: 'destructive' });
-        return;
-    }
-    await signOut(auth);
+    await supabase.auth.signOut();
+    setCurrentUser(null);
     router.push('/');
     toast({ title: 'Você saiu da sua conta.' });
   };
