@@ -39,12 +39,13 @@ export default function AvatarGrid() {
           </CardHeader>
           <CardContent className="flex-grow flex items-center justify-center">
             <Image
-              src={avatar.image}
-              alt={avatar.name}
+              src={avatar.image || 'https://placehold.co/200x200?text=Avatar'}
+              alt={avatar.name || 'Avatar'}
               width={200}
               height={200}
               className="rounded-lg object-cover aspect-square"
               data-ai-hint={avatar.hint}
+              onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=Avatar'; }}
             />
           </CardContent>
           <CardFooter>
