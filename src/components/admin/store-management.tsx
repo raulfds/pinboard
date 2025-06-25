@@ -68,30 +68,32 @@ export default function StoreManagement() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {avatars.map((avatar) => (
-            <TableRow key={avatar.id}>
-              <TableCell>
-                <Image 
-                  src={avatar.image} 
-                  alt={avatar.name} 
-                  width={80} 
-                  height={80} 
-                  className="rounded-md"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/80x80?text=Avatar'; }}
-                />
-              </TableCell>
-              <TableCell>{avatar.name}</TableCell>
-              <TableCell>{avatar.price}</TableCell>
-              <TableCell>{avatar.hint}</TableCell>
-              <TableCell className="text-right space-x-2">
-                <Button variant="outline" size="icon" onClick={() => handleEdit(avatar)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="destructive" size="icon" onClick={() => removeAvatar(avatar.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
+          {avatars.filter(Boolean).map((avatar) => (
+            avatar && (
+              <TableRow key={avatar.id}>
+                <TableCell>
+                  <Image 
+                    src={avatar.image || 'https://placehold.co/80x80?text=Avatar'} 
+                    alt={avatar.name || 'Avatar'} 
+                    width={80} 
+                    height={80} 
+                    className="rounded-md"
+                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/80x80?text=Avatar'; }}
+                  />
+                </TableCell>
+                <TableCell>{avatar.name || 'Sem nome'}</TableCell>
+                <TableCell>{avatar.price ?? '-'}</TableCell>
+                <TableCell>{avatar.hint || '-'}</TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button variant="outline" size="icon" onClick={() => handleEdit(avatar)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="destructive" size="icon" onClick={() => removeAvatar(avatar.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )
           ))}
         </TableBody>
       </Table>
