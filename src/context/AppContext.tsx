@@ -173,6 +173,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const receiver = users.find(u => u.id === receiverId);
     if (!giver || !receiver) return;
 
+    // Otimista: atualiza localmente antes do Supabase
+    const tempPin = {
+      id: `temp-${Date.now()}`,
+      giver,
+      receiver,
+      reason,
+      timestamp: new Date(),
+    };
+    setPins(prev => [tempPin, ...prev]);
+    setUsers(prev => prev.map(u => u.id === receiver.id ? { ...u, points: u.points + 1 } : u));
+
     const newPin = {
       giver_id: giver.id,
       receiver_id: receiver.id,
@@ -182,34 +193,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.from('pins').insert([newPin]);
     if (error) {
       toast({ title: 'Erro ao dar PIN', description: error.message, variant: 'destructive' });
+      // Reverte otimista
+      setPins(prev => prev.filter(p => p.id !== tempPin.id));
+      setUsers(prev => prev.map(u => u.id === receiver.id ? { ...u, points: u.points - 1 } : u));
       return;
     }
-    // Atualizar pontos do receiver no banco
-    await supabase.from('users').update({ points: receiver.points + 1 }).eq('id', receiver.id);
-    // Atualizar pontos do receiver no estado local
-    setUsers(prev => prev.map(u => u.id === receiver.id ? { ...u, points: u.points + 1 } : u));
+    // Fallback: se realtime não atualizar, força fetch
+    setTimeout(() => { fetchPins(); fetchUsers(); }, 2000);
   };
 
   // Função para invalidar PIN (remover do Supabase)
   const invalidatePin = async (pinId: string) => {
-    const { error } = await supabase.from('pins').delete().eq('id', pinId);
-    if (!error) {
-      setPins(prev => prev.filter(p => p.id !== pinId));
-      toast({ title: 'PIN invalidado com sucesso.' });
+    // Otimista: remove localmente
+    const pinToRemove = pins.find(p => p.id === pinId);
+    setPins(prev => prev.filter(p => p.id !== pinId));
+    if (pinToRemove) {
+      setUsers(prev => prev.map(u => u.id === pinToRemove.receiver.id ? { ...u, points: u.points - 1 } : u));
     }
+    const { error } = await supabase.from('pins').delete().eq('id', pinId);
+    if (error) {
+      toast({ title: 'Erro ao invalidar PIN', description: error.message, variant: 'destructive' });
+      // Reverte otimista
+      setPins(prev => [...prev, pinToRemove!]);
+      if (pinToRemove) {
+        setUsers(prev => prev.map(u => u.id === pinToRemove.receiver.id ? { ...u, points: u.points + 1 } : u));
+      }
+      return;
+    }
+    // Fallback: se realtime não atualizar, força fetch
+    setTimeout(() => { fetchPins(); fetchUsers(); }, 2000);
   };
 
   // Função para remover usuário
   const removeUser = async (userId: string) => {
-    // Remover todos os PINs relacionados ao usuário
+    // Otimista: remove localmente
+    setUsers(prev => prev.filter(u => u.id !== userId));
+    setPins(prev => prev.filter(p => p.giver.id !== userId && p.receiver.id !== userId));
     await supabase.from('pins').delete().or(`giver_id.eq.${userId},receiver_id.eq.${userId}`);
-    // Remover o usuário
     const { error } = await supabase.from('users').delete().eq('id', userId);
-    if (!error) {
-      setUsers(prev => prev.filter(u => u.id !== userId));
-      setPins(prev => prev.filter(p => p.giver.id !== userId && p.receiver.id !== userId));
-      toast({ title: 'Usuário e PINs relacionados removidos com sucesso.' });
+    if (error) {
+      toast({ title: 'Erro ao remover usuário', description: error.message, variant: 'destructive' });
+      // Fallback: força fetch
+      setTimeout(() => { fetchPins(); fetchUsers(); }, 2000);
+      return;
     }
+    setTimeout(() => { fetchPins(); fetchUsers(); }, 2000);
   };
 
   // Função para adicionar avatar no Supabase

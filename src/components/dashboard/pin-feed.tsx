@@ -86,9 +86,7 @@ export default function PinFeed() {
                     })}
                   </span>
                   <div className="flex items-center gap-2 ml-0 sm:ml-4">
-                    <Button size="sm" variant="ghost" onClick={() => voteHaha(pin.id)} title="Achar engraçado">
-                      😂 {pin.haha_votes || 0}
-                    </Button>
+                    {/* Removido botão de haha */}
                   </div>
                 </div>
                 <div className="flex items-start gap-2 sm:gap-3 pl-1">
