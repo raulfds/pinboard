@@ -7,20 +7,28 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Flame } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function AvatarGrid() {
   const { toast } = useToast();
-  const { avatars, currentUser } = useApp();
+  const { avatars, currentUser, users, updateAvatar } = useApp();
+  const [loadingAvatar, setLoadingAvatar] = useState<string | null>(null);
 
   if (!currentUser) return null;
 
-  const handleBuy = (avatar: Avatar) => {
-    if (currentUser.points >= avatar.price) {
-      toast({
-        title: 'Compra Realizada!',
-        description: `Você desbloqueou o avatar "${avatar.name}".`,
-      });
-      // Here you would typically call a function from context to update user's avatar and points
+  // Simulação: lista de IDs de avatares já "comprados" pelo usuário
+  // Em produção, você deve buscar do backend/relacionamento
+  const userAvatars = [currentUser.avatar, ...avatars.filter(a => a.price === 0).map(a => a.image)].filter(Boolean);
+
+  const handleBuyOrUse = async (avatar: Avatar) => {
+    setLoadingAvatar(avatar.id);
+    if (currentUser.avatar === avatar.image || userAvatars.includes(avatar.image)) {
+      await supabase.from('users').update({ avatar: avatar.image }).eq('id', currentUser.id);
+      toast({ title: 'Avatar atualizado!', description: `Você está usando o avatar "${avatar.name}".` });
+    } else if (currentUser.points >= avatar.price) {
+      await supabase.from('users').update({ avatar: avatar.image, points: currentUser.points - avatar.price }).eq('id', currentUser.id);
+      toast({ title: 'Compra Realizada!', description: `Você desbloqueou e está usando o avatar "${avatar.name}".` });
     } else {
       toast({
         title: 'Pontos insuficientes',
@@ -28,36 +36,40 @@ export default function AvatarGrid() {
         variant: 'destructive',
       });
     }
+    setLoadingAvatar(null);
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {avatars.map((avatar) => (
-        <Card key={avatar.id} className="flex flex-col">
-          <CardHeader>
-            <CardTitle>{avatar.name}</CardTitle>
+        <Card key={avatar.id} className="h-[300px] flex flex-col justify-between">
+          <CardHeader className="flex-row items-center space-y-4 space-x-4">
+            <CardTitle className="text-sm font-medium leading-none">{avatar.name}</CardTitle>
           </CardHeader>
-          <CardContent className="flex-grow flex items-center justify-center">
+          <CardContent className="flex items-center justify-center flex-1">
             <Image
-              src={(avatar.image ? avatar.image.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/200x200?text=Avatar')}
-              alt={avatar.name || 'Avatar'}
-              width={200}
-              height={200}
-              className="rounded-lg object-cover aspect-square"
-              data-ai-hint={avatar.hint}
-              onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=Avatar'; }}
+              src={avatar.image}
+              alt={avatar.name}
+              width={80}
+              height={80}
+              className="rounded-full object-cover"
             />
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex items-center justify-center">
             <Button
-              className="w-full"
-              onClick={() => handleBuy(avatar)}
-              disabled={currentUser.points < avatar.price && avatar.price > 0}
+              className="w-full text-xs sm:text-sm"
+              variant={currentUser.avatar === avatar.image ? 'secondary' : userAvatars.includes(avatar.image) ? 'default' : 'outline'}
+              onClick={() => handleBuyOrUse(avatar)}
+              disabled={loadingAvatar === avatar.id}
             >
-              {avatar.price === 0 ? 'Padrão' : (
-                <>
-                  <Flame className="mr-2 h-4 w-4" /> {avatar.price} Pontos
-                </>
+              {loadingAvatar === avatar.id ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent inline-block"></span>
+              ) : currentUser.avatar === avatar.image ? (
+                'Usando'
+              ) : userAvatars.includes(avatar.image) ? (
+                'Usar'
+              ) : (
+                `Comprar${avatar.price > 0 ? ` (${avatar.price} pontos)` : ''}`
               )}
             </Button>
           </CardFooter>
