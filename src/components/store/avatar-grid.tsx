@@ -50,8 +50,8 @@ export default function AvatarGrid() {
             <Image
               src={avatar.image}
               alt={avatar.name}
-              width={80}
-              height={80}
+              width={100}
+              height={100}
               className="rounded-full object-cover"
             />
           </CardContent>

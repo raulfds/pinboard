@@ -57,43 +57,43 @@ export default function PinFeed() {
           {filteredPins.length > 0 ? (
             filteredPins.map((pin) => (
               <div key={pin.id} className="p-4 border rounded-lg bg-background/50">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Avatar className="h-6 w-6">
+                <div className="flex items-center justify-between mb-1 sm:mb-2 flex-wrap gap-2">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                    <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
                       {pin.giver && pin.giver.avatar && (
                         <>
-                          <AvatarImage src={(pin.giver.avatar ? pin.giver.avatar.replace(/([^:]\/)\/+/, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.giver.name || 'Avatar'} data-ai-hint="fire character"/>
+                          <AvatarImage src={(pin.giver.avatar ? pin.giver.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.giver.name || 'Avatar'} data-ai-hint="fire character"/>
                           <AvatarFallback>{pin.giver.name?.charAt(0) ?? '?'}</AvatarFallback>
                         </>
                       )}
                     </Avatar>
-                    <span className="font-semibold">{pin.giver?.name ?? 'Usuário removido'}</span>
+                    <span className="font-semibold max-w-[100px] truncate">{pin.giver?.name ?? 'Usuário removido'}</span>
                     <ArrowRight className="h-4 w-4 text-primary" />
-                     <Avatar className="h-6 w-6">
+                     <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
                       {pin.receiver && pin.receiver.avatar && (
                         <>
-                          <AvatarImage src={(pin.receiver.avatar ? pin.receiver.avatar.replace(/([^:]\/)\/+/, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.receiver.name || 'Avatar'} data-ai-hint="fire character" />
+                          <AvatarImage src={(pin.receiver.avatar ? pin.receiver.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.receiver.name || 'Avatar'} data-ai-hint="fire character" />
                           <AvatarFallback>{pin.receiver.name?.charAt(0) ?? '?'}</AvatarFallback>
                         </>
                       )}
                     </Avatar>
-                    <span className="font-semibold">{pin.receiver?.name ?? 'Usuário removido'}</span>
+                    <span className="font-semibold max-w-[100px] truncate">{pin.receiver?.name ?? 'Usuário removido'}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {formatDistanceToNow(new Date(pin.timestamp), {
                       addSuffix: true,
                       locale: ptBR,
                     })}
                   </span>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 ml-0 sm:ml-4">
                     <Button size="sm" variant="ghost" onClick={() => voteHaha(pin.id)} title="Achar engraçado">
                       😂 {pin.haha_votes || 0}
                     </Button>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 pl-1">
+                <div className="flex items-start gap-2 sm:gap-3 pl-1">
                   <MessageSquare className="h-5 w-5 mt-0.5 text-primary/70 shrink-0"/>
-                  <p className="text-foreground">{pin.reason}</p>
+                  <p className="text-foreground text-xs sm:text-base break-words max-w-full whitespace-pre-line">{pin.reason}</p>
                 </div>
               </div>
             ))
