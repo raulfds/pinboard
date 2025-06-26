@@ -11,11 +11,15 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle, Trash2, Edit } from 'lucide-react';
 import Image from 'next/image';
 import type { Avatar } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 export default function StoreManagement() {
   const { avatars, addAvatar, updateAvatar, removeAvatar } = useApp();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState<Avatar | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
 
   const handleEdit = (avatar: Avatar) => {
     setCurrentAvatar(avatar);
@@ -27,23 +31,46 @@ export default function StoreManagement() {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const { data, error } = await supabase.storage.from('avatars').upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+      if (error) throw error;
+      // Gerar URL pública
+      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      setImageUrl(publicUrlData.publicUrl);
+    } catch (err: any) {
+      setUploadError(err.message || 'Erro ao fazer upload');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
       name: formData.get('name') as string,
-      image: formData.get('image') as string,
+      image: imageUrl || (formData.get('image') as string),
       price: Number(formData.get('price')),
       hint: formData.get('hint') as string,
     };
-
     if (currentAvatar) {
-      updateAvatar({ ...currentAvatar, ...data });
+      await updateAvatar({ ...currentAvatar, ...data });
     } else {
-      addAvatar(data);
+      await addAvatar(data);
     }
     setIsDialogOpen(false);
     setCurrentAvatar(null);
+    setImageUrl("");
   };
 
   return (
@@ -110,7 +137,18 @@ export default function StoreManagement() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="image">URL da Imagem</Label>
-              <Input id="image" name="image" defaultValue={currentAvatar?.image} required placeholder="https://placehold.co/200x200.png"/>
+              <Input id="image" name="image" defaultValue={currentAvatar?.image} placeholder="https://placehold.co/200x200.png" disabled={!!imageUrl} />
+              <div className="flex gap-2 items-center mt-2">
+                <input type="file" accept="image/*" onChange={handleFileChange} />
+                {uploading && <span>Enviando...</span>}
+                {uploadError && <span className="text-red-500">{uploadError}</span>}
+                {imageUrl && <span className="text-green-600">Imagem enviada!</span>}
+              </div>
+              {imageUrl && (
+                <div className="mt-2">
+                  <Image src={imageUrl} alt="Preview" width={80} height={80} className="rounded-md object-cover aspect-square" />
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Preço (em pontos)</Label>
