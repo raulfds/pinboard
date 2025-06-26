@@ -192,13 +192,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Função para invalidar PIN (remover do Supabase)
   const invalidatePin = async (pinId: string) => {
     const { error } = await supabase.from('pins').delete().eq('id', pinId);
-    if (!error) toast({ title: 'PIN invalidado com sucesso.' });
+    if (!error) {
+      setPins(prev => prev.filter(p => p.id !== pinId));
+      toast({ title: 'PIN invalidado com sucesso.' });
+    }
   };
 
   // Função para remover usuário
   const removeUser = async (userId: string) => {
     const { error } = await supabase.from('users').delete().eq('id', userId);
-    if (!error) toast({ title: 'Usuário removido com sucesso.' });
+    if (!error) {
+      setUsers(prev => prev.filter(u => u.id !== userId));
+      toast({ title: 'Usuário removido com sucesso.' });
+    }
   };
 
   // Função para adicionar avatar no Supabase
