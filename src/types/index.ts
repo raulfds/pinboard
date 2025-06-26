@@ -15,6 +15,7 @@ export interface Pin {
   receiver: User;
   reason: string;
   timestamp: Date;
+  haha_votes?: number;
 }
 
 export interface Avatar {

@@ -21,6 +21,7 @@ interface AppContextType {
   addAvatar: (avatar: Omit<Avatar, 'id'>) => void;
   updateAvatar: (avatar: Avatar) => void;
   removeAvatar: (avatarId: string) => void;
+  voteHaha: (pinId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -200,10 +201,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Função para remover usuário
   const removeUser = async (userId: string) => {
+    // Remover todos os PINs relacionados ao usuário
+    await supabase.from('pins').delete().or(`giver_id.eq.${userId},receiver_id.eq.${userId}`);
+    // Remover o usuário
     const { error } = await supabase.from('users').delete().eq('id', userId);
     if (!error) {
       setUsers(prev => prev.filter(u => u.id !== userId));
-      toast({ title: 'Usuário removido com sucesso.' });
+      setPins(prev => prev.filter(p => p.giver.id !== userId && p.receiver.id !== userId));
+      toast({ title: 'Usuário e PINs relacionados removidos com sucesso.' });
     }
   };
 
@@ -240,6 +245,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast({ title: 'Avatar removido com sucesso!'});
   };
 
+  // Função para votar 'haha' em um PIN
+  const voteHaha = async (pinId: string) => {
+    // Atualiza no banco: incrementa haha_votes
+    const { data, error } = await supabase.rpc('increment_haha_votes', { pin_id: pinId });
+    if (!error) {
+      setPins(prev => prev.map(p => p.id === pinId ? { ...p, haha_votes: (p.haha_votes || 0) + 1 } : p));
+    }
+  };
+
   // Substituir loginWithGoogle para usar Supabase Auth
   const loginWithGoogle = async () => {
     setLoading(true);
@@ -273,6 +287,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addAvatar,
     updateAvatar,
     removeAvatar,
+    voteHaha,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ArrowRight, MessageSquare } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import { Button } from '@/components/ui/button';
 
 const filterPins = (pins: Pin[], filter: 'day' | 'week' | 'month') => {
   const now = new Date();
@@ -30,7 +31,7 @@ const filterPins = (pins: Pin[], filter: 'day' | 'week' | 'month') => {
 };
 
 export default function PinFeed() {
-  const { pins } = useApp();
+  const { pins, voteHaha } = useApp();
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('week');
   const filteredPins = filterPins(pins, filter).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
@@ -59,24 +60,24 @@ export default function PinFeed() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Avatar className="h-6 w-6">
-                      {pin.giver.avatar && (
+                      {pin.giver && pin.giver.avatar && (
                         <>
-                          <AvatarImage src={(pin.giver.avatar ? pin.giver.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.giver.name || 'Avatar'} data-ai-hint="fire character"/>
-                          <AvatarFallback>{pin.giver.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={(pin.giver.avatar ? pin.giver.avatar.replace(/([^:]\/)\/+/, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.giver.name || 'Avatar'} data-ai-hint="fire character"/>
+                          <AvatarFallback>{pin.giver.name?.charAt(0) ?? '?'}</AvatarFallback>
                         </>
                       )}
                     </Avatar>
-                    <span className="font-semibold">{pin.giver.name}</span>
+                    <span className="font-semibold">{pin.giver?.name ?? 'Usuário removido'}</span>
                     <ArrowRight className="h-4 w-4 text-primary" />
                      <Avatar className="h-6 w-6">
-                      {pin.receiver.avatar && (
+                      {pin.receiver && pin.receiver.avatar && (
                         <>
-                          <AvatarImage src={(pin.receiver.avatar ? pin.receiver.avatar.replace(/([^:]\/)(\/)+/g, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.receiver.name || 'Avatar'} data-ai-hint="fire character" />
-                          <AvatarFallback>{pin.receiver.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={(pin.receiver.avatar ? pin.receiver.avatar.replace(/([^:]\/)\/+/, '$1') : 'https://placehold.co/40x40?text=Avatar')} alt={pin.receiver.name || 'Avatar'} data-ai-hint="fire character" />
+                          <AvatarFallback>{pin.receiver.name?.charAt(0) ?? '?'}</AvatarFallback>
                         </>
                       )}
                     </Avatar>
-                    <span className="font-semibold">{pin.receiver.name}</span>
+                    <span className="font-semibold">{pin.receiver?.name ?? 'Usuário removido'}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(pin.timestamp), {
@@ -84,10 +85,15 @@ export default function PinFeed() {
                       locale: ptBR,
                     })}
                   </span>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button size="sm" variant="ghost" onClick={() => voteHaha(pin.id)} title="Achar engraçado">
+                      😂 {pin.haha_votes || 0}
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-start gap-3 pl-1">
-                    <MessageSquare className="h-5 w-5 mt-0.5 text-primary/70 shrink-0"/>
-                    <p className="text-foreground">{pin.reason}</p>
+                  <MessageSquare className="h-5 w-5 mt-0.5 text-primary/70 shrink-0"/>
+                  <p className="text-foreground">{pin.reason}</p>
                 </div>
               </div>
             ))
