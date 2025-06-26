@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Flame, LayoutGrid, Store, User as UserIcon, LogOut, Shield, ChevronDown } from 'lucide-react';
 import {
   Sidebar,
@@ -20,8 +20,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useApp } from '@/context/AppContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 
 export default function DashboardLayout({
   children,
@@ -30,9 +28,6 @@ export default function DashboardLayout({
 }) {
   const { currentUser, logout, loading } = useApp();
   const router = useRouter();
-  const [senha, setSenha] = useState('');
-  const [senhaCorreta, setSenhaCorreta] = useState(false);
-  const [tentou, setTentou] = useState(false);
 
   useEffect(() => {
     if (!loading && !currentUser) {
@@ -46,39 +41,6 @@ export default function DashboardLayout({
         <Flame className="h-12 w-12 animate-pulse text-primary" />
       </div>
     )
-  }
-
-  // Modal de senha
-  if (!senhaCorreta) {
-    return (
-      <Dialog open>
-        <DialogContent className="max-w-xs">
-          <DialogHeader>
-            <DialogTitle>Digite a senha para acessar o painel</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={e => {
-            e.preventDefault();
-            if (senha === 'vaitomando') {
-              setSenhaCorreta(true);
-            } else {
-              setTentou(true);
-            }
-          }} className="flex flex-col gap-4">
-            <Input
-              type="password"
-              placeholder="Senha"
-              value={senha}
-              onChange={e => setSenha(e.target.value)}
-              autoFocus
-            />
-            {tentou && senha !== 'vaitomando' && (
-              <span className="text-red-500 text-sm">Senha incorreta</span>
-            )}
-            <Button type="submit">Entrar</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-    );
   }
 
   return (
