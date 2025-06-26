@@ -93,6 +93,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUsers(data || []);
     };
     fetchUsers();
+
+    // Escuta em tempo real usando on('postgres_changes') para users
+    const channel = supabase
+      .channel('public:users')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
+        fetchUsers();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Carregar PINs do Supabase e escutar em tempo real
@@ -124,6 +135,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .channel('public:pins')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pins' }, () => {
         fetchPins();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Carregar avatares do Supabase
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const { data, error } = await supabase.from('avatars').select('*');
+      if (error) {
+        toast({ title: 'Erro ao carregar avatares', description: error.message, variant: 'destructive' });
+        return;
+      }
+      setAvatars(data || []);
+    };
+    fetchAvatars();
+
+    // Escuta em tempo real usando on('postgres_changes') para avatars
+    const channel = supabase
+      .channel('public:avatars')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'avatars' }, () => {
+        fetchAvatars();
       })
       .subscribe();
     return () => {
@@ -165,19 +200,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.from('users').delete().eq('id', userId);
     if (!error) toast({ title: 'Usuário removido com sucesso.' });
   };
-
-  // Carregar avatares do Supabase
-  useEffect(() => {
-    const fetchAvatars = async () => {
-      const { data, error } = await supabase.from('avatars').select('*');
-      if (error) {
-        toast({ title: 'Erro ao carregar avatares', description: error.message, variant: 'destructive' });
-        return;
-      }
-      setAvatars(data || []);
-    };
-    fetchAvatars();
-  }, []);
 
   // Função para adicionar avatar no Supabase
   const addAvatar = async (avatarData: Omit<Avatar, 'id'>) => {
