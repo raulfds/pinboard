@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    domains: [
+      'yfsrokuexyqxfgkocuda.supabase.co',
+      'placehold.co'
+    ],
   },
 };
 
